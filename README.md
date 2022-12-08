@@ -7,7 +7,7 @@ O progama faz reflection de libs (.dll's) do SQL Server para fazer coletar e faz
 
  - Instance Info: Coleta dos dados version, display Version, TCP Port, MinServerMemory, Server Name, Collation, Patch KbUpdate;
 
- - Disk Size: Coleta da sys.dm_os_volume_stats com sys.master_files, Informaçõa de espaço em disco nos discos que possuem datafiles;
+ - Disk Size: Coleta da sys.dm_os_volume_stats com sys.master_files, Informação de espaço em disco nos discos que possuem datafiles;
 
  - Datafiles: Coleta da sys.master_files com sys.filegroups rodando em um cursor para coletar informações dos datafiles com fileproperty e informação dos filegroups;
  
@@ -18,5 +18,11 @@ O progama faz reflection de libs (.dll's) do SQL Server para fazer coletar e faz
  - Index Fragmentation: Coleta de dados com schema.table.index.fragmentation
 
  Melhorias previstas:
-  - Página específica para Min Server Memory, Max Server Memory, PLE, Host Memory, Host Available Momory
+  - Página específica para Min Server Memory, Max Server Memory, PLE, Host Memory, Host Available Memory
   - Página específica pra plano de acesso aos índices
+
+Requisitos:
+
+  - SQL server 2016, ou Azure SQL Database, ou Azure Managed Instance com database DBInstanceInfo
+  - Database DBInstanceInfo deployado com a DDL DbInstanceInfo-ddl.sql
+  - Powershell 5.x ou 7.x
