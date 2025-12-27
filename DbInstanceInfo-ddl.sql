@@ -1,3 +1,42 @@
+
+
+create database DBInstanceInfo
+ON PRIMARY
+(
+	name = 'DBIsntanceInfo_Priamry',
+	filename = 'F:\SQL2K22A\DATA\DBIsntanceInfo_Priamry.ndf',
+	Size = 100MB,
+	MAXSIZE = 2000MB,
+	FILEGROWTH = 100MB
+), 
+
+ FileGroup DBInstanceInfo_DATA_01
+(
+	name = 'DBIsntanceInfo_DATA_01_01',
+	filename = 'F:\SQL2K22A\DATA\DBIsntanceInfo_DATA_01_01.ndf',
+	Size = 100MB,
+	MAXSIZE = 2000MB,
+	FILEGROWTH = 100MB
+),
+
+ FileGroup DBInstanceInfo_INDEX_01
+(
+	name = 'DBInstanceInfo_INDEX_01_01',
+	filename = 'F:\SQL2K22A\DATA\DBInstanceInfo_INDEX_01_01.ndf',
+	Size = 100MB,
+	MAXSIZE = 2000MB,
+	FILEGROWTH = 100MB
+)
+LOG ON
+(
+	name = 'DBInstanceInfo_LOG_01',
+	filename = 'F:\SQL2K22A\LOG\DBInstanceInfo_LOG_01.ldf',
+	Size = 100MB,
+	MAXSIZE = UNLIMITED,
+	FILEGROWTH = 100MB
+)
+go
+
 use DBInstanceInfo
 go
 
