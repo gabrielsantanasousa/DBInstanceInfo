@@ -6,7 +6,7 @@
 Function change-mssql ([string]$instancia,[string]$banco,[string]$dml)
 {
 $sqlConnection = New-Object System.Data.SqlClient.SqlConnection
-$sqlConnection.ConnectionString = "Data Source=$instancia;Initial Catalog=$banco;Integrated Security = True;Connection Timeout=60"
+$sqlConnection.ConnectionString = "Data Source=$instancia;Initial Catalog=$banco;Connection Timeout=60;$script:InfoConn"
 $sqlConnection.Open()
 
 $sqlcmd = New-Object System.Data.SqlClient.SqlCommand
@@ -22,7 +22,7 @@ $sqlConnection.Close()
 Function select-mssql ([string]$instancia,[string]$banco,[string]$dml)
 {
 $sqlConnection = New-Object System.Data.SqlClient.SqlConnection
-$sqlConnection.ConnectionString = "Data Source=$instancia;Initial Catalog=$banco;Integrated Security = True;Connection Timeout=90"
+$sqlConnection.ConnectionString = "Data Source=$instancia;Initial Catalog=$banco;Connection Timeout=90;$script:InfoConn"
 $sqlConnection.Open()
 
 $sqlcmd = New-Object System.Data.SqlClient.SqlCommand
@@ -42,7 +42,7 @@ $sqlConnection.Close()
 Function testeconnect-mssql ([string]$instancia)
 {
 $sqlConnection = New-Object System.Data.SqlClient.SqlConnection
-$sqlConnection.ConnectionString = "Data Source=$instancia;Initial Catalog=master;Integrated Security = True;Connection Timeout=20;"
+$sqlConnection.ConnectionString = "Data Source=$instancia;Initial Catalog=master;Connection Timeout=20;$script:InfoConn"
 $sqlConnection.Open()
 $sqlConnection.State
 $sqlConnection.Close()
@@ -50,7 +50,7 @@ $sqlConnection.State
 }
 
 
-$script:querymsdbinfduq = @"
+$script:querycms = @"
 select shg.server_group_id,
 shg.parent_id,
 		shg.name,
@@ -194,7 +194,7 @@ Function Escreve-log ([string]$instancia,[string]$tipo,[string]$descricao)
     $objeto | Add-Member -MemberType NoteProperty -Name TIPO -Value "$tipocoleta"
     $objeto | Add-Member -MemberType NoteProperty -Name INSTANCIA -Value "$instancia"
     $objeto | Add-Member -MemberType NoteProperty -Name DESCRICAO -Value "$descricao"
-    $objeto | Export-Csv -NoTypeInformation -Append -Path "D:\_robos\etl-instanceinfo\log\ETL-ISTANCEINFO_$($datalog).csv"
+    $objeto | Export-Csv -NoTypeInformation -Append -Path "$env:TEMP\ETL-ISTANCEINFO_$($datalog).csv"
 
 }
 
@@ -203,9 +203,8 @@ Function Cadastra-InstanciaMSSQL
 
     
     $tipocoleta = "Cadastra-Instancia"
-    # $queryinstancias = select-mssql -instancia $script:DbInstanceInfo -banco msdb -dml "$script:querymsdbinfduq" commented line, use based on CMS
     change-mssql -instancia $script:DbInstanceInfo -banco DBInstanceInfo -dml "delete from ErroColeta_MSSQL where TipoColeta = '$tipocoleta'"
-    foreach ($instancia in $queryinstancias.server_name)
+    foreach ($instancia in $script:IntancesArray)
     {
         
         $Error.clear()
@@ -646,9 +645,59 @@ Function Cadastra-IndiceMSSQL
     }
 }
 
-$script:DbInstanceInfo = read-host  "Informe a instancia do DBInstanceInfo"
-$script:IntancesArray = read-host  "Informe a lista de instancias separadas por virgula"
-$script:IntancesArray = $script:IntancesArray -replace " ","" -split ","
+clear-host
+WRITE-HOST "DBINSTANCE INFO - COLETA DE INFORMAÇÔES centralizadas de instâncias SQL SERVER"
+$script:DbInstanceInfo = read-host  "INFORME A INSTANCIA DO DBINSTANCEINFO"
+DO {
+       
+        clear-host
+        WRITE-HOST "DBINSTANCE INFO - COLETA DE INFORMAÇÔES centralizadas de instâncias SQL SERVER"
+        WRITE-HOST "UTILIZARÁ CMS OU NOME DAS INSTÂNCIAS SEPARADAS POR VÍRGULA"
+        Write-Host "DIGITE 1 - COLETA USANDO CMS"
+        Write-Host "DIGITE 2 - COLETA COM NOME DAS INSTÂNCIAS SEPARADAS POR VÍRGULA"
+        Write-Host "DIGITE UMA DAS OPCOES OU SAIR"
+        $script:tipocoleta = Read-Host "INFORME UMA DAS OPCOES, 1, OU 2, OU SAIR"
+    } until ($script:tipocoleta -eq 1 -or $script:tipocoleta -eq 2 -or $script:tipocoleta -eq "SAIR")
+
+switch ($script:tipocoleta)
+{
+    1 {
+         select-mssql -instancia $script:DbInstanceInfo -banco MSDB -dml $script:querycms
+        }
+    2 {
+            $script:IntancesArray = read-host  "Informe a lista de instancias separadas por virgula"
+            $script:IntancesArray = $script:IntancesArray -replace " ","" -split ","
+        }
+}
+
+DO {
+       
+        clear-host
+        WRITE-HOST "DBINSTANCE INFO - COLETA DE INFORMAÇÔES centralizadas de instâncias SQL SERVER"
+        WRITE-HOST "UTILIZARÁ WINDOWS AUTENTHICATION OU USUÁRIO E SENHA?"
+        Write-Host "DIGITE 1 - WINDOWS AUTHENTICATION"
+        Write-Host "DIGITE 2 - USUARIO E SENHA"
+        Write-Host "DIGITE UMA DAS OPCOES OU SAIR"
+        $script:autenticacao = Read-Host "INFORME UMA DAS OPCOES"
+    } until ($script:autenticacao -eq 1 -or $script:autenticacao -eq 2 -or $script:autenticacao -eq "SAIR")
+
+
+switch ($script:autenticacao)
+{
+    1{
+        $script:InfoConn = "Integrated Security = True"
+        }
+    2{
+        $usuario = Read-Host "INFORME O USUARIO"
+        $senha = Read-Host "INFORME A SENHA"
+        $script:InfoConn = "User ID=$usuario;Password=$senha"
+        }
+
+}
+
+# Integrated Security = True
+
+
 Write-Host "################## CADASTRA INSTANCIA ##################"
 Cadastra-InstanciaMSSQL
 Write-Host "################## CADASTRA DISCO ##################"

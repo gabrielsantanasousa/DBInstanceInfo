@@ -147,5 +147,3 @@ alter table ErroColeta_MSSQL alter column Nome varchar(160)
 go
 alter table ErroColeta_MSSQL alter column TipoColeta varchar(30)
 go
-alter table ErroColeta_MSSQL alter column Erro varchar(800)
-go
